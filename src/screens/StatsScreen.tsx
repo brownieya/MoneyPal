@@ -18,7 +18,7 @@ export default function StatsScreen() {
       </View>
 
       {monthlySummary.map(item => {
-        const cat = CATEGORY_MAP[item.category as any];
+        const cat = CATEGORY_MAP[item.category];
         const pct = total > 0 ? ((item.total / total) * 100).toFixed(1) : '0';
         return (
           <View key={item.category} style={styles.row}>

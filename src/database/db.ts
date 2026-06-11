@@ -1,7 +1,12 @@
 import * as SQLite from 'expo-sqlite';
-import { Transaction, TransactionFilter } from '../types';
+import { CategoryId, MonthlySummary, Transaction, TransactionFilter } from '../types';
 
 const db = SQLite.openDatabaseSync('moneypal.db');
+
+function hasColumn(table: string, column: string): boolean {
+  const result = db.getAllSync<{ name: string }>(`PRAGMA table_info(${table})`);
+  return result.some(item => item.name === column);
+}
 
 /** 初始化数据库表 */
 export function initDB(): void {
@@ -13,8 +18,19 @@ export function initDB(): void {
       note      TEXT    NOT NULL DEFAULT '',
       source    TEXT    NOT NULL DEFAULT 'manual',
       raw       TEXT    NOT NULL DEFAULT '',
+      externalId TEXT   NOT NULL DEFAULT '',
       createdAt TEXT    NOT NULL
     );
+  `);
+
+  if (!hasColumn('transactions', 'externalId')) {
+    db.execSync(`ALTER TABLE transactions ADD COLUMN externalId TEXT NOT NULL DEFAULT '';`);
+  }
+
+  db.execSync(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_transactions_external_id
+    ON transactions (externalId)
+    WHERE externalId != '';
   `);
 }
 
@@ -23,9 +39,15 @@ export function insertTransaction(
   tx: Omit<Transaction, 'id'>
 ): number {
   const result = db.runSync(
-    `INSERT INTO transactions (amount, category, note, source, raw, createdAt)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    tx.amount, tx.category, tx.note, tx.source, tx.raw, tx.createdAt
+    `INSERT OR IGNORE INTO transactions (amount, category, note, source, raw, externalId, createdAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    tx.amount,
+    tx.category,
+    tx.note,
+    tx.source,
+    tx.raw,
+    tx.externalId,
+    tx.createdAt
   );
   return result.lastInsertRowId;
 }
@@ -66,12 +88,16 @@ export function deleteTransactions(ids: number[]): void {
   db.runSync(`DELETE FROM transactions WHERE id IN (${placeholders})`, ...ids);
 }
 
+export function updateTransactionCategory(id: number, category: CategoryId): void {
+  db.runSync('UPDATE transactions SET category = ? WHERE id = ?', category, id);
+}
+
 /** 按分类统计本月总消费（返回分为单位） */
-export function getMonthlySummary(): { category: string; total: number }[] {
+export function getMonthlySummary(): MonthlySummary[] {
   const start = new Date();
   start.setDate(1);
   start.setHours(0, 0, 0, 0);
-  return db.getAllSync<{ category: string; total: number }>(
+  return db.getAllSync<MonthlySummary>(
     `SELECT category, SUM(amount) as total
      FROM transactions
      WHERE createdAt >= ?

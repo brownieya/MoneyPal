@@ -38,6 +38,7 @@ export function startSmsListener() {
       note: '',
       source: 'sms',
       raw: body,
+      externalId: '',
       createdAt: new Date().toISOString(),
     });
     console.log('[SmsListener] 自动记录：', amount / 100, '元，分类：', category);

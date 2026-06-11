@@ -3,7 +3,7 @@ import { CATEGORY_KEYWORDS } from '../constants/categories';
 
 /**
  * 根据文本内容自动匹配消费分类
- * 优先返回第一个匹配的分类，无匹配则返回 'other'
+ * 优先返回第一个匹配的分类，无匹配则返回 'uncategorized'
  */
 export function matchCategory(text: string): CategoryId {
   for (const rule of CATEGORY_KEYWORDS) {
@@ -11,7 +11,7 @@ export function matchCategory(text: string): CategoryId {
       return rule.category;
     }
   }
-  return 'other';
+  return 'uncategorized';
 }
 
 /**
@@ -21,10 +21,13 @@ export function matchCategory(text: string): CategoryId {
 export function extractAmount(text: string): number | null {
   const patterns = [
     /(?:人民币|rmb|¥|金额)[^\d]*(\d+\.?\d*)/i,
+    /(?:￥|¥)\s?(\d+\.?\d*)/,
     /(\d+\.?\d*)元/,
     /共消费(\d+\.?\d*)/,
     /扣款(\d+\.?\d*)/,
     /支出(\d+\.?\d*)/,
+    /付款(\d+\.?\d*)/,
+    /支付(\d+\.?\d*)/,
   ];
   for (const pattern of patterns) {
     const match = text.match(pattern);

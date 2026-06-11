@@ -1,6 +1,7 @@
 import { Category, CategoryId } from '../types';
 
 export const CATEGORIES: Category[] = [
+  { id: 'uncategorized', label: '待分类', icon: '⏳', color: '#8D99AE' },
   { id: 'food',          label: '饮食',   icon: '🍜', color: '#FF6B6B' },
   { id: 'transport',     label: '交通',   icon: '🚇', color: '#4ECDC4' },
   { id: 'shopping',      label: '购物',   icon: '🛍️', color: '#45B7D1' },
@@ -24,6 +25,6 @@ export const CATEGORY_KEYWORDS: { keywords: string[]; category: CategoryId }[] =
   { keywords: ['steam', 'Steam', '游戏', '网易', '腾讯游戏', '王者', '原神', '充值', '点券'], category: 'game' },
   { keywords: ['医院', '药店', '诊所', '挂号', '医疗', '药'], category: 'medical' },
   { keywords: ['培训', '课程', '学习', '教育', '网课', '作业帮', '猿辅导'], category: 'education' },
-  { keywords: ['电影', '爱奇艺', '优酱', '腾讯视频', '哔哩哔哩', 'B站', 'KTV', '演出', '票'], category: 'entertainment' },
+  { keywords: ['电影', '爱奇艺', '优酷', '腾讯视频', '哔哩哔哩', 'B站', 'KTV', '演出', '票'], category: 'entertainment' },
   { keywords: ['转账', '红包', '收款', '付款给'], category: 'transfer' },
 ];

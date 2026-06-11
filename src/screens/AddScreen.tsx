@@ -25,6 +25,7 @@ export default function AddScreen() {
       note,
       source: 'manual',
       raw: '',
+      externalId: '',
       createdAt: new Date().toISOString(),
     });
     setAmount('');
