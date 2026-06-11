@@ -12,6 +12,7 @@ import {
   insertTransaction,
   queryTransactions,
   updateTransactionCategory,
+  updateTransactionNote,
 } from '../database/db';
 import { extractAmount, matchCategory } from '../utils/categoryMatcher';
 
@@ -29,6 +30,7 @@ interface TransactionStore {
   deleteSelected: () => void;
   setFilter: (filter: TransactionFilter) => void;
   updateCategory: (id: number, category: CategoryId) => void;
+  updateNote: (id: number, note: string) => void;
   importNotifications: (notifications: PaymentNotification[]) => number;
 
   // Stats
@@ -86,6 +88,11 @@ export const useTransactionStore = create<TransactionStore>((set, get) => ({
 
   updateCategory: (id, category) => {
     updateTransactionCategory(id, category);
+    get().refresh();
+  },
+
+  updateNote: (id, note) => {
+    updateTransactionNote(id, note);
     get().refresh();
   },
 

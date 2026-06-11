@@ -92,6 +92,10 @@ export function updateTransactionCategory(id: number, category: CategoryId): voi
   db.runSync('UPDATE transactions SET category = ? WHERE id = ?', category, id);
 }
 
+export function updateTransactionNote(id: number, note: string): void {
+  db.runSync('UPDATE transactions SET note = ? WHERE id = ?', note.trim(), id);
+}
+
 /** 按分类统计本月总消费（返回分为单位） */
 export function getMonthlySummary(): MonthlySummary[] {
   const start = new Date();

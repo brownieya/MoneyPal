@@ -6,6 +6,7 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -24,10 +25,12 @@ export default function HomeScreen() {
     clearSelection,
     deleteSelected,
     updateCategory,
+    updateNote,
   } =
     useTransactionStore();
   const [editingTransaction, setEditingTransaction] = React.useState<Transaction | null>(null);
   const [notificationEnabled, setNotificationEnabled] = React.useState(true);
+  const [draftNote, setDraftNote] = React.useState('');
 
   useEffect(() => { load(); }, []);
 
@@ -60,8 +63,18 @@ export default function HomeScreen() {
     }
 
     updateCategory(editingTransaction.id, category);
-    setEditingTransaction(null);
+    setEditingTransaction({ ...editingTransaction, category });
   }, [editingTransaction, updateCategory]);
+
+  const handleSaveNote = useCallback(() => {
+    if (!editingTransaction) {
+      return;
+    }
+
+    updateNote(editingTransaction.id, draftNote);
+    setEditingTransaction({ ...editingTransaction, note: draftNote });
+    Alert.alert('已保存', '备注已更新');
+  }, [draftNote, editingTransaction, updateNote]);
 
   const renderItem = ({ item }: { item: Transaction }) => {
     const cat = CATEGORY_MAP[item.category];
@@ -80,6 +93,7 @@ export default function HomeScreen() {
           }
 
           setEditingTransaction(item);
+          setDraftNote(item.note);
         }}
       >
         <Text style={styles.icon}>{cat?.icon ?? '📦'}</Text>
@@ -136,13 +150,26 @@ export default function HomeScreen() {
       >
         <Pressable style={styles.modalBackdrop} onPress={() => setEditingTransaction(null)}>
           <Pressable style={styles.modalCard}>
-            <Text style={styles.modalTitle}>修改分类</Text>
+            <Text style={styles.modalTitle}>编辑账单</Text>
             {editingTransaction && (
               <>
                 <Text style={styles.modalAmount}>¥{(editingTransaction.amount / 100).toFixed(2)}</Text>
                 <Text style={styles.modalRaw}>
-                  {editingTransaction.note || editingTransaction.raw || '这条记录没有备注'}
+                  {editingTransaction.raw || '这条记录没有原始通知内容'}
                 </Text>
+                <Text style={styles.modalSectionTitle}>备注</Text>
+                <TextInput
+                  style={styles.noteInput}
+                  value={draftNote}
+                  onChangeText={setDraftNote}
+                  placeholder="添加备注"
+                  placeholderTextColor="#999"
+                  multiline
+                />
+                <TouchableOpacity style={styles.saveButton} onPress={handleSaveNote}>
+                  <Text style={styles.saveButtonText}>保存备注</Text>
+                </TouchableOpacity>
+                <Text style={styles.modalSectionTitle}>分类</Text>
                 <View style={styles.categoryGrid}>
                   {CATEGORIES.map(category => {
                     const isActive = category.id === editingTransaction.category;
@@ -229,11 +256,30 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 18, fontWeight: '700', color: '#222' },
   modalAmount: { fontSize: 28, fontWeight: '700', color: '#E53935', marginTop: 12 },
   modalRaw: { fontSize: 13, color: '#666', marginTop: 8, lineHeight: 20 },
+  modalSectionTitle: { fontSize: 14, fontWeight: '700', color: '#333', marginTop: 18, marginBottom: 8 },
+  noteInput: {
+    minHeight: 84,
+    borderRadius: 12,
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 14,
+    color: '#222',
+    textAlignVertical: 'top',
+  },
+  saveButton: {
+    marginTop: 10,
+    alignSelf: 'flex-start',
+    backgroundColor: '#E53935',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  saveButtonText: { color: '#fff', fontSize: 14, fontWeight: '700' },
   categoryGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-    marginTop: 20,
   },
   categoryItem: {
     width: '22%',
