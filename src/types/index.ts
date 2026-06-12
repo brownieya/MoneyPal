@@ -15,6 +15,7 @@ export interface Category {
   label: string;
   icon: string;
   color: string;
+  iconBackground: string;
 }
 
 export interface Transaction {

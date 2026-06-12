@@ -1,22 +1,43 @@
 import React, { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { AppState, Platform, StyleSheet, View } from 'react-native';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { AppState, Text } from 'react-native';
 import { enableScreens } from 'react-native-screens';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
 import { initDB } from './src/database/db';
 import {
   consumePendingNotifications,
   listenToNotifications,
 } from './src/modules/notificationListener';
 import { useTransactionStore } from './src/store/useTransactionStore';
+import AddScreen from './src/screens/AddScreen';
+import HomeScreen from './src/screens/HomeScreen';
+import StatsScreen from './src/screens/StatsScreen';
+import { colors, radius, shadows } from './src/theme/tokens';
 
 enableScreens();
-import HomeScreen from './src/screens/HomeScreen';
-import AddScreen from './src/screens/AddScreen';
-import StatsScreen from './src/screens/StatsScreen';
 
 const Tab = createBottomTabNavigator();
+
+const navigationTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: colors.background,
+    card: colors.surface,
+    primary: colors.primary,
+    text: colors.text,
+    border: colors.border,
+  },
+};
+
+const TAB_ICONS = {
+  Home: ['home-outline', 'home'],
+  Add: ['add-circle-outline', 'add-circle'],
+  Stats: ['stats-chart-outline', 'stats-chart'],
+} as const;
 
 export default function App() {
   const importNotifications = useTransactionStore(state => state.importNotifications);
@@ -49,22 +70,34 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
+      <StatusBar style="dark" />
+      <NavigationContainer theme={navigationTheme}>
         <Tab.Navigator
-          screenOptions={{
-            tabBarActiveTintColor: '#E53935',
-            tabBarInactiveTintColor: '#999',
-            headerStyle: { backgroundColor: '#E53935' },
-            headerTintColor: '#fff',
-            headerTitleStyle: { fontWeight: '700' },
-          }}
+          screenOptions={({ route }) => ({
+            headerShown: false,
+            tabBarActiveTintColor: colors.primary,
+            tabBarInactiveTintColor: colors.textTertiary,
+            tabBarShowLabel: true,
+            tabBarLabelStyle: styles.tabBarLabel,
+            tabBarStyle: styles.tabBar,
+            tabBarItemStyle: styles.tabBarItem,
+            tabBarIcon: ({ color, focused }) => {
+              const routeName = route.name as keyof typeof TAB_ICONS;
+              const iconName = focused ? TAB_ICONS[routeName][1] : TAB_ICONS[routeName][0];
+
+              return (
+                <View style={[styles.tabIconWrap, focused && styles.tabIconWrapActive]}>
+                  <Ionicons name={iconName} size={route.name === 'Add' ? 24 : 22} color={color} />
+                </View>
+              );
+            },
+          })}
         >
           <Tab.Screen
             name="Home"
             component={HomeScreen}
             options={{
-              title: '账单',
-              tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, color }}>📋</Text>,
+              title: '首页',
             }}
           />
           <Tab.Screen
@@ -72,7 +105,6 @@ export default function App() {
             component={AddScreen}
             options={{
               title: '记一笔',
-              tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, color }}>➕</Text>,
             }}
           />
           <Tab.Screen
@@ -80,7 +112,6 @@ export default function App() {
             component={StatsScreen}
             options={{
               title: '统计',
-              tabBarIcon: ({ color }) => <Text style={{ fontSize: 20, color }}>📊</Text>,
             }}
           />
         </Tab.Navigator>
@@ -88,3 +119,31 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    height: Platform.select({ ios: 84, default: 68 }),
+    paddingTop: 8,
+    paddingBottom: Platform.select({ ios: 22, default: 10 }),
+    borderTopWidth: 0,
+    backgroundColor: colors.surface,
+    ...shadows,
+  },
+  tabBarItem: {
+    paddingVertical: 4,
+  },
+  tabBarLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  tabIconWrap: {
+    width: 38,
+    height: 38,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.pill,
+  },
+  tabIconWrapActive: {
+    backgroundColor: colors.primaryMuted,
+  },
+});
