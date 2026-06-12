@@ -2,6 +2,23 @@
   "expo": {
     "name": "MoneyPal",
     "slug": "MoneyPal",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "scheme": "moneypal",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "android": {
+      "package": "com.moneypal"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1216b730-afb6-406f-911e-a582b490a0bf"
+      }
+    },
+    "owner": "hinoshitakaho",
+    "updates": {
+      "url": "https://u.expo.dev/1216b730-afb6-406f-911e-a582b490a0bf"
+    },
+    "ios": {}
   }
 }

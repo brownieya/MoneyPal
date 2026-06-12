@@ -41,6 +41,7 @@ class PaymentNotificationListenerService : NotificationListenerService() {
       return false
     }
 
+    val normalized = content.lowercase()
     val includeKeywords = listOf(
       "支付",
       "付款",
@@ -51,9 +52,14 @@ class PaymentNotificationListenerService : NotificationListenerService() {
       "已支付",
       "微信支付",
       "支付宝",
+      "bill",
+      "paid",
     )
     val excludeKeywords = listOf("收款", "到账", "收入", "退款", "入账")
+    val hasAmount = Regex("""(?:￥|¥|\d+\.\d{1,2}\s*元)""").containsMatchIn(content)
 
-    return includeKeywords.any(content::contains) && excludeKeywords.none(content::contains)
+    return hasAmount &&
+      includeKeywords.any(normalized::contains) &&
+      excludeKeywords.none(content::contains)
   }
 }

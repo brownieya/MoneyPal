@@ -13,7 +13,11 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { CATEGORIES, CATEGORY_MAP } from '../constants/categories';
 import { useTransactionStore } from '../store/useTransactionStore';
-import { openNotificationAccessSettings, isNotificationAccessEnabled } from '../modules/notificationListener';
+import {
+  consumePendingNotifications,
+  openNotificationAccessSettings,
+  isNotificationAccessEnabled,
+} from '../modules/notificationListener';
 import { CategoryId, Transaction } from '../types';
 
 export default function HomeScreen() {
@@ -26,6 +30,7 @@ export default function HomeScreen() {
     deleteSelected,
     updateCategory,
     updateNote,
+    importNotifications,
   } =
     useTransactionStore();
   const [editingTransaction, setEditingTransaction] = React.useState<Transaction | null>(null);
@@ -41,8 +46,10 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      load();
       void checkNotificationPermission();
-    }, [checkNotificationPermission])
+      void consumePendingNotifications().then(importNotifications);
+    }, [checkNotificationPermission, importNotifications, load])
   );
 
   const handleDelete = useCallback(() => {

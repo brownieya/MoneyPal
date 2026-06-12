@@ -1,14 +1,15 @@
 import { create } from 'zustand';
 import {
   CategoryId,
-  MonthlySummary,
   PaymentNotification,
+  SummaryItem,
+  SummaryPeriod,
   Transaction,
   TransactionFilter,
 } from '../types';
 import {
   deleteTransactions,
-  getMonthlySummary,
+  getSummary,
   insertTransaction,
   queryTransactions,
   updateTransactionCategory,
@@ -21,7 +22,6 @@ interface TransactionStore {
   selectedIds: Set<number>;
   filter: TransactionFilter;
 
-  // Actions
   refresh: (filter?: TransactionFilter) => void;
   load: (filter?: TransactionFilter) => void;
   addTransaction: (tx: Omit<Transaction, 'id'>) => void;
@@ -33,23 +33,24 @@ interface TransactionStore {
   updateNote: (id: number, note: string) => void;
   importNotifications: (notifications: PaymentNotification[]) => number;
 
-  // Stats
-  monthlySummary: MonthlySummary[];
-  loadSummary: () => void;
+  summary: SummaryItem[];
+  summaryPeriod: SummaryPeriod;
+  loadSummary: (period?: SummaryPeriod) => void;
 }
 
 export const useTransactionStore = create<TransactionStore>((set, get) => ({
   transactions: [],
   selectedIds: new Set(),
   filter: {},
-  monthlySummary: [],
+  summary: [],
+  summaryPeriod: 'month',
 
   refresh: (filter?: TransactionFilter) => {
     const currentFilter = filter ?? get().filter;
     set({
       transactions: queryTransactions(currentFilter),
       filter: currentFilter,
-      monthlySummary: getMonthlySummary(),
+      summary: getSummary(get().summaryPeriod),
     });
   },
 
@@ -129,8 +130,11 @@ export const useTransactionStore = create<TransactionStore>((set, get) => ({
     return importedCount;
   },
 
-  loadSummary: () => {
-    const monthlySummary = getMonthlySummary();
-    set({ monthlySummary });
+  loadSummary: (period) => {
+    const currentPeriod = period ?? get().summaryPeriod;
+    set({
+      summary: getSummary(currentPeriod),
+      summaryPeriod: currentPeriod,
+    });
   },
 }));

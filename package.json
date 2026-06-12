@@ -7,9 +7,11 @@
     "@react-navigation/native": "^7.2.5",
     "babel-preset-expo": "^56.0.14",
     "expo": "~56.0.8",
+    "expo-dev-client": "~56.0.20",
     "expo-modules-core": "^56.0.14",
     "expo-sqlite": "^56.0.4",
     "expo-status-bar": "~56.0.4",
+    "expo-updates": "~56.0.19",
     "react": "19.2.3",
     "react-native": "0.85.3",
     "react-native-safe-area-context": "^5.8.0",
@@ -25,7 +27,13 @@
     "start": "expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build:android:development": "eas build --profile development --platform android",
+    "update:development": "eas update --branch development",
+    "update:preview": "eas update --branch preview",
+    "update:production": "eas update --branch production",
+    "update:list:branches": "eas branch:list",
+    "update:list:channels": "eas channel:list"
   },
   "private": true,
   "devDependencies": {

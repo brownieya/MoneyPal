@@ -19,13 +19,13 @@ export interface Category {
 
 export interface Transaction {
   id: number;
-  amount: number;          // 金额（分），避免浮点问题
+  amount: number;
   category: CategoryId;
   note: string;
   source: 'manual' | 'sms' | 'notification';
-  raw: string;             // 原始短信/通知内容
-  externalId: string;      // 原生通知唯一标识，用于去重
-  createdAt: string;       // ISO 8601
+  raw: string;
+  externalId: string;
+  createdAt: string;
 }
 
 export interface TransactionFilter {
@@ -34,7 +34,9 @@ export interface TransactionFilter {
   endDate?: string;
 }
 
-export interface MonthlySummary {
+export type SummaryPeriod = 'week' | 'month' | 'year';
+
+export interface SummaryItem {
   category: CategoryId;
   total: number;
 }

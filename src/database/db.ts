@@ -1,5 +1,5 @@
 import * as SQLite from 'expo-sqlite';
-import { CategoryId, MonthlySummary, Transaction, TransactionFilter } from '../types';
+import { CategoryId, SummaryItem, SummaryPeriod, Transaction, TransactionFilter } from '../types';
 
 const db = SQLite.openDatabaseSync('moneypal.db');
 
@@ -8,7 +8,6 @@ function hasColumn(table: string, column: string): boolean {
   return result.some(item => item.name === column);
 }
 
-/** 初始化数据库表 */
 export function initDB(): void {
   db.execSync(`
     CREATE TABLE IF NOT EXISTS transactions (
@@ -34,10 +33,7 @@ export function initDB(): void {
   `);
 }
 
-/** 插入一条消费记录 */
-export function insertTransaction(
-  tx: Omit<Transaction, 'id'>
-): number {
+export function insertTransaction(tx: Omit<Transaction, 'id'>): number {
   const result = db.runSync(
     `INSERT OR IGNORE INTO transactions (amount, category, note, source, raw, externalId, createdAt)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -52,7 +48,6 @@ export function insertTransaction(
   return result.lastInsertRowId;
 }
 
-/** 查询消费记录，支持按分类和日期过滤 */
 export function queryTransactions(filter?: TransactionFilter): Transaction[] {
   const conditions: string[] = [];
   const params: (string | number)[] = [];
@@ -77,12 +72,10 @@ export function queryTransactions(filter?: TransactionFilter): Transaction[] {
   );
 }
 
-/** 删除指定 id 的记录 */
 export function deleteTransaction(id: number): void {
   db.runSync('DELETE FROM transactions WHERE id = ?', id);
 }
 
-/** 批量删除 */
 export function deleteTransactions(ids: number[]): void {
   const placeholders = ids.map(() => '?').join(',');
   db.runSync(`DELETE FROM transactions WHERE id IN (${placeholders})`, ...ids);
@@ -96,16 +89,32 @@ export function updateTransactionNote(id: number, note: string): void {
   db.runSync('UPDATE transactions SET note = ? WHERE id = ?', note.trim(), id);
 }
 
-/** 按分类统计本月总消费（返回分为单位） */
-export function getMonthlySummary(): MonthlySummary[] {
+function getPeriodStart(period: SummaryPeriod): string {
   const start = new Date();
-  start.setDate(1);
   start.setHours(0, 0, 0, 0);
-  return db.getAllSync<MonthlySummary>(
+
+  if (period === 'week') {
+    const day = start.getDay();
+    const diff = day === 0 ? 6 : day - 1;
+    start.setDate(start.getDate() - diff);
+    return start.toISOString();
+  }
+
+  if (period === 'year') {
+    start.setMonth(0, 1);
+    return start.toISOString();
+  }
+
+  start.setDate(1);
+  return start.toISOString();
+}
+
+export function getSummary(period: SummaryPeriod): SummaryItem[] {
+  return db.getAllSync<SummaryItem>(
     `SELECT category, SUM(amount) as total
      FROM transactions
      WHERE createdAt >= ?
      GROUP BY category`,
-    start.toISOString()
+    getPeriodStart(period)
   );
 }
