@@ -16,9 +16,11 @@ import CategoryIcon from '../components/CategoryIcon';
 import { CATEGORIES } from '../constants/categories';
 import { useTransactionStore } from '../store/useTransactionStore';
 import { CategoryId } from '../types';
-import { colors, radius, shadows, spacing, typography } from '../theme/tokens';
+import { AppTheme, useAppTheme } from '../theme/tokens';
 
 export default function AddScreen() {
+  const theme = useAppTheme();
+  const styles = createStyles(theme);
   const { addTransaction } = useTransactionStore();
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState<CategoryId>('other');
@@ -65,7 +67,7 @@ export default function AddScreen() {
               <Text style={styles.headerTitle}>快速记一笔</Text>
             </View>
             <View style={styles.headerBadge}>
-              <Ionicons name="flash-outline" size={16} color={colors.primary} />
+              <Ionicons name="flash-outline" size={16} color={theme.colors.primary} />
               <Text style={styles.headerBadgeText}>轻量录入</Text>
             </View>
           </View>
@@ -80,7 +82,7 @@ export default function AddScreen() {
                 onChangeText={setAmount}
                 keyboardType="decimal-pad"
                 placeholder="0.00"
-                placeholderTextColor={colors.textTertiary}
+                placeholderTextColor={theme.colors.textTertiary}
               />
             </View>
             <Text style={styles.fieldHint}>金额放在第一视觉层，录入会更快更明确。</Text>
@@ -115,7 +117,7 @@ export default function AddScreen() {
               value={note}
               onChangeText={setNote}
               placeholder="补充这笔消费的说明，例如午餐、打车、会员续费"
-              placeholderTextColor={colors.textTertiary}
+              placeholderTextColor={theme.colors.textTertiary}
               multiline
             />
           </View>
@@ -129,147 +131,149 @@ export default function AddScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  keyboard: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  contentContainer: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxxl,
-  },
-  header: {
-    marginTop: spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerEyebrow: {
-    color: colors.textTertiary,
-    fontSize: typography.caption,
-    fontWeight: '600',
-  },
-  headerTitle: {
-    marginTop: spacing.xs,
-    color: colors.text,
-    fontSize: typography.title,
-    fontWeight: '700',
-  },
-  headerBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.pill,
-    backgroundColor: colors.primaryMuted,
-  },
-  headerBadgeText: {
-    color: colors.primary,
-    fontSize: typography.caption,
-    fontWeight: '700',
-  },
-  amountCard: {
-    marginTop: spacing.xl,
-    padding: spacing.xxl,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-    ...shadows,
-  },
-  fieldLabel: {
-    color: colors.textSecondary,
-    fontSize: typography.body,
-    fontWeight: '600',
-  },
-  amountRow: {
-    marginTop: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  amountPrefix: {
-    color: colors.text,
-    fontSize: 34,
-    fontWeight: '700',
-  },
-  amountInput: {
-    flex: 1,
-    paddingVertical: 0,
-    color: colors.text,
-    fontSize: 34,
-    fontWeight: '700',
-  },
-  fieldHint: {
-    marginTop: spacing.sm,
-    color: colors.textSecondary,
-    fontSize: typography.caption,
-    lineHeight: 18,
-  },
-  card: {
-    marginTop: spacing.lg,
-    padding: spacing.lg,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-  },
-  cardTitle: {
-    color: colors.text,
-    fontSize: typography.body,
-    fontWeight: '700',
-  },
-  categoryGrid: {
-    marginTop: spacing.md,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  categoryCard: {
-    width: '23%',
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-    borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
-    gap: spacing.sm,
-  },
-  categoryCardActive: {
-    backgroundColor: colors.primaryMuted,
-  },
-  categoryLabel: {
-    color: colors.textSecondary,
-    fontSize: typography.caption,
-    fontWeight: '600',
-  },
-  categoryLabelActive: {
-    color: colors.primary,
-  },
-  noteInput: {
-    minHeight: 104,
-    marginTop: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
-    color: colors.text,
-    fontSize: typography.body,
-    textAlignVertical: 'top',
-  },
-  submitButton: {
-    marginTop: spacing.xl,
-    minHeight: 52,
-    borderRadius: radius.md,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  submitButtonText: {
-    color: colors.surface,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    keyboard: {
+      flex: 1,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    contentContainer: {
+      paddingHorizontal: theme.spacing.lg,
+      paddingBottom: theme.spacing.xxxl,
+    },
+    header: {
+      marginTop: theme.spacing.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    headerEyebrow: {
+      color: theme.colors.textTertiary,
+      fontSize: theme.typography.caption,
+      fontWeight: '600',
+    },
+    headerTitle: {
+      marginTop: theme.spacing.xs,
+      color: theme.colors.text,
+      fontSize: theme.typography.title,
+      fontWeight: '700',
+    },
+    headerBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing.xs,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+      borderRadius: theme.radius.pill,
+      backgroundColor: theme.colors.primaryMuted,
+    },
+    headerBadgeText: {
+      color: theme.colors.primary,
+      fontSize: theme.typography.caption,
+      fontWeight: '700',
+    },
+    amountCard: {
+      marginTop: theme.spacing.xl,
+      padding: theme.spacing.xxl,
+      borderRadius: theme.radius.lg,
+      backgroundColor: theme.colors.surface,
+      ...theme.shadows,
+    },
+    fieldLabel: {
+      color: theme.colors.textSecondary,
+      fontSize: theme.typography.body,
+      fontWeight: '600',
+    },
+    amountRow: {
+      marginTop: theme.spacing.md,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing.sm,
+    },
+    amountPrefix: {
+      color: theme.colors.text,
+      fontSize: 34,
+      fontWeight: '700',
+    },
+    amountInput: {
+      flex: 1,
+      paddingVertical: 0,
+      color: theme.colors.text,
+      fontSize: 34,
+      fontWeight: '700',
+    },
+    fieldHint: {
+      marginTop: theme.spacing.sm,
+      color: theme.colors.textSecondary,
+      fontSize: theme.typography.caption,
+      lineHeight: 18,
+    },
+    card: {
+      marginTop: theme.spacing.lg,
+      padding: theme.spacing.lg,
+      borderRadius: theme.radius.md,
+      backgroundColor: theme.colors.surface,
+    },
+    cardTitle: {
+      color: theme.colors.text,
+      fontSize: theme.typography.body,
+      fontWeight: '700',
+    },
+    categoryGrid: {
+      marginTop: theme.spacing.md,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: theme.spacing.sm,
+    },
+    categoryCard: {
+      width: '23%',
+      paddingVertical: theme.spacing.md,
+      alignItems: 'center',
+      borderRadius: theme.radius.md,
+      backgroundColor: theme.colors.surfaceMuted,
+      gap: theme.spacing.sm,
+    },
+    categoryCardActive: {
+      backgroundColor: theme.colors.primaryMuted,
+    },
+    categoryLabel: {
+      color: theme.colors.textSecondary,
+      fontSize: theme.typography.caption,
+      fontWeight: '600',
+    },
+    categoryLabelActive: {
+      color: theme.colors.primary,
+    },
+    noteInput: {
+      minHeight: 104,
+      marginTop: theme.spacing.md,
+      paddingHorizontal: theme.spacing.lg,
+      paddingVertical: theme.spacing.md,
+      borderRadius: theme.radius.md,
+      backgroundColor: theme.colors.surfaceMuted,
+      color: theme.colors.text,
+      fontSize: theme.typography.body,
+      textAlignVertical: 'top',
+    },
+    submitButton: {
+      marginTop: theme.spacing.xl,
+      minHeight: 52,
+      borderRadius: theme.radius.md,
+      backgroundColor: theme.colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    submitButtonText: {
+      color: theme.colors.surface,
+      fontSize: 16,
+      fontWeight: '700',
+    },
+  });
+}

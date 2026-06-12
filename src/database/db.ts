@@ -31,6 +31,13 @@ export function initDB(): void {
     ON transactions (externalId)
     WHERE externalId != '';
   `);
+
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key TEXT PRIMARY KEY NOT NULL,
+      value TEXT NOT NULL
+    );
+  `);
 }
 
 export function insertTransaction(tx: Omit<Transaction, 'id'>): number {
@@ -116,5 +123,29 @@ export function getSummary(period: SummaryPeriod): SummaryItem[] {
      WHERE createdAt >= ?
      GROUP BY category`,
     getPeriodStart(period)
+  );
+}
+
+export function getMonthlyBudget(): number {
+  const result = db.getFirstSync<{ value: string }>(
+    'SELECT value FROM app_settings WHERE key = ?',
+    'monthlyBudget'
+  );
+
+  if (!result) {
+    return 500000;
+  }
+
+  const amount = Number(result.value);
+  return Number.isFinite(amount) && amount > 0 ? amount : 500000;
+}
+
+export function setMonthlyBudget(amount: number): void {
+  db.runSync(
+    `INSERT INTO app_settings (key, value)
+     VALUES (?, ?)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+    'monthlyBudget',
+    String(amount)
   );
 }

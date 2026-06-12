@@ -44,6 +44,16 @@ class PaymentNotificationModule(
     promise.resolve(jsonArrayToReadableArray(pending))
   }
 
+  @ReactMethod
+  fun addListener(eventName: String) {
+    // Required by NativeEventEmitter on newer React Native versions.
+  }
+
+  @ReactMethod
+  fun removeListeners(count: Int) {
+    // Required by NativeEventEmitter on newer React Native versions.
+  }
+
   override fun invalidate() {
     if (instance === this) {
       instance = null

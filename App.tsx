@@ -11,27 +11,15 @@ import {
   consumePendingNotifications,
   listenToNotifications,
 } from './src/modules/notificationListener';
-import { useTransactionStore } from './src/store/useTransactionStore';
 import AddScreen from './src/screens/AddScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import StatsScreen from './src/screens/StatsScreen';
-import { colors, radius, shadows } from './src/theme/tokens';
+import { useTransactionStore } from './src/store/useTransactionStore';
+import { radius, useAppTheme } from './src/theme/tokens';
 
 enableScreens();
 
 const Tab = createBottomTabNavigator();
-
-const navigationTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    background: colors.background,
-    card: colors.surface,
-    primary: colors.primary,
-    text: colors.text,
-    border: colors.border,
-  },
-};
 
 const TAB_ICONS = {
   Home: ['home-outline', 'home'],
@@ -41,6 +29,7 @@ const TAB_ICONS = {
 
 export default function App() {
   const importNotifications = useTransactionStore(state => state.importNotifications);
+  const theme = useAppTheme();
 
   useEffect(() => {
     initDB();
@@ -70,50 +59,57 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
-      <NavigationContainer theme={navigationTheme}>
+      <StatusBar style={theme.isDark ? 'light' : 'dark'} />
+      <NavigationContainer
+        theme={{
+          ...DefaultTheme,
+          colors: {
+            ...DefaultTheme.colors,
+            background: theme.colors.background,
+            card: theme.colors.surface,
+            primary: theme.colors.primary,
+            text: theme.colors.text,
+            border: theme.colors.border,
+          },
+        }}
+      >
         <Tab.Navigator
           screenOptions={({ route }) => ({
             headerShown: false,
-            tabBarActiveTintColor: colors.primary,
-            tabBarInactiveTintColor: colors.textTertiary,
+            tabBarActiveTintColor: theme.colors.primary,
+            tabBarInactiveTintColor: theme.colors.textTertiary,
             tabBarShowLabel: true,
             tabBarLabelStyle: styles.tabBarLabel,
-            tabBarStyle: styles.tabBar,
+            tabBarStyle: [
+              styles.tabBar,
+              {
+                backgroundColor: theme.colors.surface,
+                ...theme.shadows,
+              },
+            ],
             tabBarItemStyle: styles.tabBarItem,
             tabBarIcon: ({ color, focused }) => {
               const routeName = route.name as keyof typeof TAB_ICONS;
               const iconName = focused ? TAB_ICONS[routeName][1] : TAB_ICONS[routeName][0];
 
               return (
-                <View style={[styles.tabIconWrap, focused && styles.tabIconWrapActive]}>
+                <View
+                  style={[
+                    styles.tabIconWrap,
+                    focused && {
+                      backgroundColor: theme.colors.primaryMuted,
+                    },
+                  ]}
+                >
                   <Ionicons name={iconName} size={route.name === 'Add' ? 24 : 22} color={color} />
                 </View>
               );
             },
           })}
         >
-          <Tab.Screen
-            name="Home"
-            component={HomeScreen}
-            options={{
-              title: '首页',
-            }}
-          />
-          <Tab.Screen
-            name="Add"
-            component={AddScreen}
-            options={{
-              title: '记一笔',
-            }}
-          />
-          <Tab.Screen
-            name="Stats"
-            component={StatsScreen}
-            options={{
-              title: '统计',
-            }}
-          />
+          <Tab.Screen name="Home" component={HomeScreen} options={{ title: '首页' }} />
+          <Tab.Screen name="Add" component={AddScreen} options={{ title: '记一笔' }} />
+          <Tab.Screen name="Stats" component={StatsScreen} options={{ title: '统计' }} />
         </Tab.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
@@ -126,8 +122,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: Platform.select({ ios: 22, default: 10 }),
     borderTopWidth: 0,
-    backgroundColor: colors.surface,
-    ...shadows,
   },
   tabBarItem: {
     paddingVertical: 4,
@@ -142,8 +136,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radius.pill,
-  },
-  tabIconWrapActive: {
-    backgroundColor: colors.primaryMuted,
   },
 });

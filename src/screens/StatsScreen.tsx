@@ -6,7 +6,7 @@ import CategoryIcon from '../components/CategoryIcon';
 import { CATEGORY_MAP } from '../constants/categories';
 import { useTransactionStore } from '../store/useTransactionStore';
 import { SummaryPeriod } from '../types';
-import { colors, radius, shadows, spacing, typography } from '../theme/tokens';
+import { AppTheme, useAppTheme } from '../theme/tokens';
 import { formatCurrency } from '../utils/formatters';
 
 const PERIODS: SummaryPeriod[] = ['week', 'month', 'year'];
@@ -18,6 +18,8 @@ const PERIOD_LABELS: Record<SummaryPeriod, string> = {
 };
 
 export default function StatsScreen() {
+  const theme = useAppTheme();
+  const styles = createStyles(theme);
   const { summary, summaryPeriod, loadSummary } = useTransactionStore();
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export default function StatsScreen() {
             <Text style={styles.headerTitle}>消费统计</Text>
           </View>
           <View style={styles.headerBadge}>
-            <Ionicons name="pulse-outline" size={16} color={colors.success} />
+            <Ionicons name="pulse-outline" size={16} color={theme.colors.success} />
             <Text style={styles.headerBadgeText}>趋势可见</Text>
           </View>
         </View>
@@ -103,7 +105,7 @@ export default function StatsScreen() {
 
         {summary.length === 0 && (
           <View style={styles.emptyState}>
-            <Ionicons name="analytics-outline" size={24} color={colors.textTertiary} />
+            <Ionicons name="analytics-outline" size={24} color={theme.colors.textTertiary} />
             <Text style={styles.emptyTitle}>{PERIOD_LABELS[summaryPeriod]}还没有统计数据</Text>
             <Text style={styles.emptyText}>先记几笔账单，统计页就会自动汇总你的消费分布。</Text>
           </View>
@@ -113,178 +115,180 @@ export default function StatsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  contentContainer: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxxl,
-  },
-  header: {
-    marginTop: spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerEyebrow: {
-    color: colors.textTertiary,
-    fontSize: typography.caption,
-    fontWeight: '600',
-  },
-  headerTitle: {
-    marginTop: spacing.xs,
-    color: colors.text,
-    fontSize: typography.title,
-    fontWeight: '700',
-  },
-  headerBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.pill,
-    backgroundColor: colors.successMuted,
-  },
-  headerBadgeText: {
-    color: colors.success,
-    fontSize: typography.caption,
-    fontWeight: '700',
-  },
-  segmented: {
-    marginTop: spacing.xl,
-    padding: spacing.xs,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surface,
-    flexDirection: 'row',
-  },
-  segmentButton: {
-    flex: 1,
-    minHeight: 42,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  segmentButtonActive: {
-    backgroundColor: colors.primaryMuted,
-  },
-  segmentText: {
-    color: colors.textSecondary,
-    fontSize: typography.body,
-    fontWeight: '600',
-  },
-  segmentTextActive: {
-    color: colors.primary,
-  },
-  heroCard: {
-    marginTop: spacing.lg,
-    padding: spacing.xxl,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-    ...shadows,
-  },
-  heroLabel: {
-    color: colors.textSecondary,
-    fontSize: typography.body,
-  },
-  heroAmount: {
-    marginTop: spacing.md,
-    color: colors.text,
-    fontSize: typography.hero,
-    fontWeight: '700',
-  },
-  heroHint: {
-    marginTop: spacing.sm,
-    color: colors.textSecondary,
-    fontSize: typography.caption,
-    lineHeight: 18,
-  },
-  sectionHeader: {
-    marginTop: spacing.xxl,
-    marginBottom: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  sectionTitle: {
-    color: colors.text,
-    fontSize: typography.section,
-    fontWeight: '700',
-  },
-  sectionCaption: {
-    color: colors.textTertiary,
-    fontSize: typography.caption,
-    fontWeight: '600',
-  },
-  statCard: {
-    marginBottom: spacing.md,
-    padding: spacing.lg,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-  },
-  statTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  statTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    flex: 1,
-  },
-  statTitle: {
-    color: colors.text,
-    fontSize: typography.body,
-    fontWeight: '700',
-  },
-  statCaption: {
-    marginTop: spacing.xs,
-    color: colors.textSecondary,
-    fontSize: typography.caption,
-  },
-  statAmount: {
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  progressTrack: {
-    marginTop: spacing.lg,
-    height: 10,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceMuted,
-    overflow: 'hidden',
-  },
-  progressValue: {
-    height: '100%',
-    minWidth: 8,
-    borderRadius: radius.pill,
-  },
-  emptyState: {
-    marginTop: spacing.xxl,
-    padding: spacing.xxl,
-    borderRadius: radius.lg,
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-  },
-  emptyTitle: {
-    marginTop: spacing.md,
-    color: colors.text,
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  emptyText: {
-    marginTop: spacing.sm,
-    color: colors.textSecondary,
-    fontSize: typography.body,
-    lineHeight: 22,
-    textAlign: 'center',
-  },
-});
+function createStyles(theme: AppTheme) {
+  return StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    contentContainer: {
+      paddingHorizontal: theme.spacing.lg,
+      paddingBottom: theme.spacing.xxxl,
+    },
+    header: {
+      marginTop: theme.spacing.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    headerEyebrow: {
+      color: theme.colors.textTertiary,
+      fontSize: theme.typography.caption,
+      fontWeight: '600',
+    },
+    headerTitle: {
+      marginTop: theme.spacing.xs,
+      color: theme.colors.text,
+      fontSize: theme.typography.title,
+      fontWeight: '700',
+    },
+    headerBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing.xs,
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+      borderRadius: theme.radius.pill,
+      backgroundColor: theme.colors.successMuted,
+    },
+    headerBadgeText: {
+      color: theme.colors.success,
+      fontSize: theme.typography.caption,
+      fontWeight: '700',
+    },
+    segmented: {
+      marginTop: theme.spacing.xl,
+      padding: theme.spacing.xs,
+      borderRadius: theme.radius.pill,
+      backgroundColor: theme.colors.surface,
+      flexDirection: 'row',
+    },
+    segmentButton: {
+      flex: 1,
+      minHeight: 42,
+      borderRadius: theme.radius.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    segmentButtonActive: {
+      backgroundColor: theme.colors.primaryMuted,
+    },
+    segmentText: {
+      color: theme.colors.textSecondary,
+      fontSize: theme.typography.body,
+      fontWeight: '600',
+    },
+    segmentTextActive: {
+      color: theme.colors.primary,
+    },
+    heroCard: {
+      marginTop: theme.spacing.lg,
+      padding: theme.spacing.xxl,
+      borderRadius: theme.radius.lg,
+      backgroundColor: theme.colors.surface,
+      ...theme.shadows,
+    },
+    heroLabel: {
+      color: theme.colors.textSecondary,
+      fontSize: theme.typography.body,
+    },
+    heroAmount: {
+      marginTop: theme.spacing.md,
+      color: theme.colors.text,
+      fontSize: theme.typography.hero,
+      fontWeight: '700',
+    },
+    heroHint: {
+      marginTop: theme.spacing.sm,
+      color: theme.colors.textSecondary,
+      fontSize: theme.typography.caption,
+      lineHeight: 18,
+    },
+    sectionHeader: {
+      marginTop: theme.spacing.xxl,
+      marginBottom: theme.spacing.md,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    sectionTitle: {
+      color: theme.colors.text,
+      fontSize: theme.typography.section,
+      fontWeight: '700',
+    },
+    sectionCaption: {
+      color: theme.colors.textTertiary,
+      fontSize: theme.typography.caption,
+      fontWeight: '600',
+    },
+    statCard: {
+      marginBottom: theme.spacing.md,
+      padding: theme.spacing.lg,
+      borderRadius: theme.radius.md,
+      backgroundColor: theme.colors.surface,
+    },
+    statTopRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: theme.spacing.md,
+    },
+    statTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing.sm,
+      flex: 1,
+    },
+    statTitle: {
+      color: theme.colors.text,
+      fontSize: theme.typography.body,
+      fontWeight: '700',
+    },
+    statCaption: {
+      marginTop: theme.spacing.xs,
+      color: theme.colors.textSecondary,
+      fontSize: theme.typography.caption,
+    },
+    statAmount: {
+      color: theme.colors.text,
+      fontSize: 15,
+      fontWeight: '700',
+    },
+    progressTrack: {
+      marginTop: theme.spacing.lg,
+      height: 10,
+      borderRadius: theme.radius.pill,
+      backgroundColor: theme.colors.chartTrack,
+      overflow: 'hidden',
+    },
+    progressValue: {
+      height: '100%',
+      minWidth: 8,
+      borderRadius: theme.radius.pill,
+    },
+    emptyState: {
+      marginTop: theme.spacing.xxl,
+      padding: theme.spacing.xxl,
+      borderRadius: theme.radius.lg,
+      alignItems: 'center',
+      backgroundColor: theme.colors.surface,
+    },
+    emptyTitle: {
+      marginTop: theme.spacing.md,
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    emptyText: {
+      marginTop: theme.spacing.sm,
+      color: theme.colors.textSecondary,
+      fontSize: theme.typography.body,
+      lineHeight: 22,
+      textAlign: 'center',
+    },
+  });
+}

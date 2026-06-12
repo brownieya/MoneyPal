@@ -8,10 +8,13 @@ import {
   TransactionFilter,
 } from '../types';
 import {
+  deleteTransaction,
   deleteTransactions,
+  getMonthlyBudget,
   getSummary,
   insertTransaction,
   queryTransactions,
+  setMonthlyBudget as persistMonthlyBudget,
   updateTransactionCategory,
   updateTransactionNote,
 } from '../database/db';
@@ -28,6 +31,7 @@ interface TransactionStore {
   toggleSelect: (id: number) => void;
   clearSelection: () => void;
   deleteSelected: () => void;
+  deleteTransactionById: (id: number) => void;
   setFilter: (filter: TransactionFilter) => void;
   updateCategory: (id: number, category: CategoryId) => void;
   updateNote: (id: number, note: string) => void;
@@ -36,6 +40,9 @@ interface TransactionStore {
   summary: SummaryItem[];
   summaryPeriod: SummaryPeriod;
   loadSummary: (period?: SummaryPeriod) => void;
+  monthlyBudget: number;
+  loadMonthlyBudget: () => void;
+  setMonthlyBudget: (amount: number) => void;
 }
 
 export const useTransactionStore = create<TransactionStore>((set, get) => ({
@@ -44,6 +51,7 @@ export const useTransactionStore = create<TransactionStore>((set, get) => ({
   filter: {},
   summary: [],
   summaryPeriod: 'month',
+  monthlyBudget: 500000,
 
   refresh: (filter?: TransactionFilter) => {
     const currentFilter = filter ?? get().filter;
@@ -80,6 +88,11 @@ export const useTransactionStore = create<TransactionStore>((set, get) => ({
     if (selectedIds.size === 0) return;
     deleteTransactions(Array.from(selectedIds));
     set({ selectedIds: new Set() });
+    get().refresh();
+  },
+
+  deleteTransactionById: (id) => {
+    deleteTransaction(id);
     get().refresh();
   },
 
@@ -135,6 +148,19 @@ export const useTransactionStore = create<TransactionStore>((set, get) => ({
     set({
       summary: getSummary(currentPeriod),
       summaryPeriod: currentPeriod,
+    });
+  },
+
+  loadMonthlyBudget: () => {
+    set({
+      monthlyBudget: getMonthlyBudget(),
+    });
+  },
+
+  setMonthlyBudget: (amount) => {
+    persistMonthlyBudget(amount);
+    set({
+      monthlyBudget: amount,
     });
   },
 }));
