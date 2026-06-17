@@ -86,6 +86,7 @@ eas build --profile production --platform android
 - distribution: `internal`
 - android buildType: `apk`
 - Android ABI: `arm64-v8a`
+- EAS 直接上传单个 APK 产物，不再返回整目录 `.tar.gz`
 
 打包完成后，下载安装这个 APK 到你的手机。
 

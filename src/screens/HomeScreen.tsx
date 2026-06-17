@@ -287,7 +287,7 @@ export default function HomeScreen() {
             <View style={styles.header}>
               <View>
                 <Text style={styles.headerEyebrow}>MoneyPal</Text>
-                <Text style={styles.headerTitle}>极简账单总览</Text>
+                <Text style={styles.headerTitle}>账单总览</Text>
               </View>
               <View style={styles.headerBadge}>
                 <Ionicons name="shield-checkmark-outline" size={16} color={theme.colors.primary} />
