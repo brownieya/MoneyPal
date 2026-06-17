@@ -1003,7 +1003,7 @@ function createStyles(theme: AppTheme) {
       fontSize: theme.typography.caption,
     },
     emptyState: {
-      marginTop: 72,
+      marginTop: theme.spacing.lg,
       padding: theme.spacing.xxl,
       borderRadius: theme.radius.lg,
       alignItems: 'center',
@@ -1146,15 +1146,16 @@ function createStyles(theme: AppTheme) {
     categoryGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: theme.spacing.sm,
+      justifyContent: 'space-between',
     },
     categoryCard: {
-      width: '23%',
+      width: '22.5%',
       paddingVertical: theme.spacing.md,
       borderRadius: theme.radius.md,
       backgroundColor: theme.colors.surfaceMuted,
       alignItems: 'center',
       gap: theme.spacing.sm,
+      marginBottom: theme.spacing.sm,
     },
     categoryCardActive: {
       backgroundColor: theme.colors.primaryMuted,

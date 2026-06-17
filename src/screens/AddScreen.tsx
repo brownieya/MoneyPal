@@ -230,15 +230,16 @@ function createStyles(theme: AppTheme) {
       marginTop: theme.spacing.md,
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: theme.spacing.sm,
+      justifyContent: 'space-between',
     },
     categoryCard: {
-      width: '23%',
+      width: '22.5%',
       paddingVertical: theme.spacing.md,
       alignItems: 'center',
       borderRadius: theme.radius.md,
       backgroundColor: theme.colors.surfaceMuted,
       gap: theme.spacing.sm,
+      marginBottom: theme.spacing.sm,
     },
     categoryCardActive: {
       backgroundColor: theme.colors.primaryMuted,
