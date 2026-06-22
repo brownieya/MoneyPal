@@ -20,7 +20,7 @@ class PaymentNotificationListenerService : NotificationListenerService() {
       .filter { it.isNotBlank() }
       .joinToString("\n")
 
-    if (!looksLikeExpense(body)) {
+    if (!looksLikeExpense(sbn.packageName.orEmpty(), body)) {
       return
     }
 
@@ -36,7 +36,7 @@ class PaymentNotificationListenerService : NotificationListenerService() {
     PaymentNotificationModule.emitNotification(payload)
   }
 
-  private fun looksLikeExpense(content: String): Boolean {
+  private fun looksLikeExpense(packageName: String, content: String): Boolean {
     if (content.isBlank()) {
       return false
     }
@@ -54,12 +54,23 @@ class PaymentNotificationListenerService : NotificationListenerService() {
       "支付宝",
       "bill",
       "paid",
+      "purchase",
+      "debit",
     )
     val excludeKeywords = listOf("收款", "到账", "收入", "退款", "入账")
-    val hasAmount = Regex("""(?:￥|¥|\d+\.\d{1,2}\s*元)""").containsMatchIn(content)
+    val trustedPackages = setOf(
+      "com.tencent.mm",
+      "com.eg.android.AlipayGphone",
+      "com.unionpay",
+      "com.tencent.mobileqq",
+    )
+    val hasAmount = Regex("""(?:¥|￥|人民币|RMB|CNY)?\s*\d+(?:\.\d{1,2})?\s*(?:元)?""")
+      .containsMatchIn(content)
+    val matchesKeyword = includeKeywords.any(normalized::contains)
+    val matchesTrustedPackage = packageName in trustedPackages
 
     return hasAmount &&
-      includeKeywords.any(normalized::contains) &&
+      (matchesKeyword || matchesTrustedPackage) &&
       excludeKeywords.none(content::contains)
   }
 }

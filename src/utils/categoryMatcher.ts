@@ -1,39 +1,36 @@
 import { CategoryId } from '../types';
 import { CATEGORY_KEYWORDS } from '../constants/categories';
 
-/**
- * 根据文本内容自动匹配消费分类
- * 优先返回第一个匹配的分类，无匹配则返回 'uncategorized'
- */
 export function matchCategory(text: string): CategoryId {
   for (const rule of CATEGORY_KEYWORDS) {
-    if (rule.keywords.some(kw => text.includes(kw))) {
+    if (rule.keywords.some(keyword => text.includes(keyword))) {
       return rule.category;
     }
   }
+
   return 'uncategorized';
 }
 
-/**
- * 从短信内容中提取金额（元），返回分为单位的整数
- * 支持格式：人民币12.50元 / ¥12.50 / 金额12.50元
- */
 export function extractAmount(text: string): number | null {
+  const normalized = text.replace(/,/g, '');
   const patterns = [
-    /(?:人民币|rmb|¥|金额)[^\d]*(\d+\.?\d*)/i,
-    /(?:￥|¥)\s?(\d+\.?\d*)/,
-    /(\d+\.?\d*)元/,
-    /共消费(\d+\.?\d*)/,
-    /扣款(\d+\.?\d*)/,
-    /支出(\d+\.?\d*)/,
-    /付款(\d+\.?\d*)/,
-    /支付(\d+\.?\d*)/,
+    /(?:人民币|RMB|CNY|¥|￥|金额)[^\d]{0,8}(\d+(?:\.\d{1,2})?)/i,
+    /(?:支付|付款|消费|支出|扣款|收款|到账)[^\d]{0,8}(\d+(?:\.\d{1,2})?)/,
+    /(\d+(?:\.\d{1,2})?)\s*元/,
+    /(\d+(?:\.\d{1,2})?)\s*(?:USD|usd)/,
   ];
+
   for (const pattern of patterns) {
-    const match = text.match(pattern);
-    if (match) {
-      return Math.round(parseFloat(match[1]) * 100);
+    const match = normalized.match(pattern);
+    if (!match) {
+      continue;
+    }
+
+    const amount = Number.parseFloat(match[1]);
+    if (Number.isFinite(amount) && amount > 0) {
+      return Math.round(amount * 100);
     }
   }
+
   return null;
 }
