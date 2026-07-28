@@ -16,6 +16,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import { useTransactionStore } from './src/store/useTransactionStore';
 import { radius, useAppTheme } from './src/theme/tokens';
+import { writeDebugLog } from './src/utils/debugLogger';
 
 enableScreens();
 
@@ -33,15 +34,26 @@ export default function App() {
 
   useEffect(() => {
     initDB();
+    writeDebugLog('app', 'database initialized');
 
     const syncNotifications = async () => {
-      const pendingNotifications = await consumePendingNotifications();
-      importNotifications(pendingNotifications);
+      try {
+        const pendingNotifications = await consumePendingNotifications();
+        writeDebugLog('bridge', `pending notifications consumed count=${pendingNotifications.length}`);
+        const importedCount = importNotifications(pendingNotifications);
+        writeDebugLog('app', `pending notification import completed count=${importedCount}`);
+      } catch (error) {
+        writeDebugLog('bridge', `pending notification sync failed error=${String(error)}`, 'error');
+      }
     };
 
     void syncNotifications();
 
     const stopListening = listenToNotifications(notification => {
+      writeDebugLog(
+        'bridge',
+        `realtime notification received externalId=${notification.externalId} package=${notification.packageName}`
+      );
       importNotifications([notification]);
     });
 

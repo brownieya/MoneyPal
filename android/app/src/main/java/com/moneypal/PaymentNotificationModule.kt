@@ -1,6 +1,8 @@
 package com.moneypal
 
+import android.content.ComponentName
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import com.facebook.react.bridge.Arguments
@@ -32,8 +34,23 @@ class PaymentNotificationModule(
 
   @ReactMethod
   fun openNotificationAccessSettings() {
-    val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
+    val detailIntent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS).apply {
+      putExtra(
+        Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME,
+        ComponentName(reactContext, PaymentNotificationListenerService::class.java)
+      )
       addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    val listIntent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
+      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    val intent = if (
+      Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+      detailIntent.resolveActivity(reactContext.packageManager) != null
+    ) {
+      detailIntent
+    } else {
+      listIntent
     }
     reactContext.startActivity(intent)
   }
@@ -41,7 +58,18 @@ class PaymentNotificationModule(
   @ReactMethod
   fun consumePendingNotifications(promise: Promise) {
     val pending = PendingNotificationStore.consume(reactContext)
+    DebugLogStore.append(reactContext, "native", "info", "JS consumed pending notifications count=${pending.length()}")
     promise.resolve(jsonArrayToReadableArray(pending))
+  }
+
+  @ReactMethod
+  fun getDebugLogs(promise: Promise) {
+    promise.resolve(jsonArrayToReadableArray(DebugLogStore.read(reactContext)))
+  }
+
+  @ReactMethod
+  fun clearDebugLogs() {
+    DebugLogStore.clear(reactContext)
   }
 
   @ReactMethod

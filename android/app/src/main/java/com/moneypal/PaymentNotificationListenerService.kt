@@ -8,11 +8,19 @@ import org.json.JSONObject
 class PaymentNotificationListenerService : NotificationListenerService() {
   override fun onNotificationPosted(sbn: StatusBarNotification?) {
     if (sbn == null) {
+      DebugLogStore.append(applicationContext, "native", "warn", "onNotificationPosted received null notification")
       return
     }
 
-    val notification = sbn.notification ?: return
-    val extras = notification.extras ?: return
+    val packageName = sbn.packageName.orEmpty()
+    val notification = sbn.notification ?: run {
+      DebugLogStore.append(applicationContext, "native", "warn", "notification object missing package=$packageName")
+      return
+    }
+    val extras = notification.extras ?: run {
+      DebugLogStore.append(applicationContext, "native", "warn", "notification extras missing package=$packageName")
+      return
+    }
     val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()?.trim().orEmpty()
     val text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString()?.trim().orEmpty()
     val bigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString()?.trim().orEmpty()
@@ -20,20 +28,48 @@ class PaymentNotificationListenerService : NotificationListenerService() {
       .filter { it.isNotBlank() }
       .joinToString("\n")
 
-    if (!looksLikeExpense(sbn.packageName.orEmpty(), body)) {
+    val matchesExpense = looksLikeExpense(packageName, body)
+    DebugLogStore.append(
+      applicationContext,
+      "native",
+      "info",
+      "notification posted package=$packageName accepted=$matchesExpense body=${preview(body)}"
+    )
+
+    if (!matchesExpense) {
       return
     }
 
     val payload = JSONObject().apply {
-      put("externalId", "${sbn.packageName}:${sbn.id}:${sbn.postTime}")
-      put("packageName", sbn.packageName)
+      put("externalId", "$packageName:${sbn.id}:${sbn.postTime}")
+      put("packageName", packageName)
       put("title", title)
       put("text", if (bigText.isNotBlank()) bigText else text)
       put("postedAt", java.time.Instant.ofEpochMilli(sbn.postTime).toString())
     }
 
-    PendingNotificationStore.enqueue(applicationContext, payload)
-    PaymentNotificationModule.emitNotification(payload)
+    try {
+      PendingNotificationStore.enqueue(applicationContext, payload)
+      DebugLogStore.append(
+        applicationContext,
+        "native",
+        "info",
+        "notification queued externalId=${payload.getString("externalId")}"
+      )
+      PaymentNotificationModule.emitNotification(payload)
+      DebugLogStore.append(applicationContext, "native", "info", "notification event dispatch attempted to JS")
+    } catch (error: Exception) {
+      DebugLogStore.append(
+        applicationContext,
+        "native",
+        "error",
+        "notification queue or JS dispatch failed error=${error.message ?: error::class.java.simpleName}"
+      )
+    }
+  }
+
+  private fun preview(value: String): String {
+    return value.replace('\n', ' ').take(180)
   }
 
   private fun looksLikeExpense(packageName: String, content: String): Boolean {

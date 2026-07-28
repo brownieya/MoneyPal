@@ -55,3 +55,13 @@ export interface PaymentNotification {
   text: string;
   postedAt: string;
 }
+
+export type DebugLogLevel = 'info' | 'warn' | 'error';
+
+export interface DebugLog {
+  id: number;
+  timestamp: string;
+  source: string;
+  level: DebugLogLevel;
+  message: string;
+}

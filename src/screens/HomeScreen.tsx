@@ -15,6 +15,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import CategoryIcon from '../components/CategoryIcon';
 import { CATEGORIES, CATEGORY_MAP } from '../constants/categories';
+import DeveloperLogsScreen from './DeveloperLogsScreen';
 import {
   consumePendingNotifications,
   isNotificationAccessEnabled,
@@ -71,6 +72,7 @@ export default function HomeScreen() {
   const [draftNote, setDraftNote] = useState('');
   const [listMode, setListMode] = useState<ListMode>('month');
   const [budgetInput, setBudgetInput] = useState('');
+  const [showDeveloperLogs, setShowDeveloperLogs] = useState(false);
 
   useEffect(() => {
     load();
@@ -289,9 +291,19 @@ export default function HomeScreen() {
                 <Text style={styles.headerEyebrow}>MoneyPal</Text>
                 <Text style={styles.headerTitle}>账单总览</Text>
               </View>
-              <View style={styles.headerBadge}>
+              <View style={styles.headerActions}>
+                <Pressable
+                  style={styles.headerIconButton}
+                  onPress={() => setShowDeveloperLogs(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel="打开开发者日志"
+                >
+                  <Ionicons name="bug-outline" size={18} color={theme.colors.primary} />
+                </Pressable>
+                <View style={styles.headerBadge}>
                 <Ionicons name="shield-checkmark-outline" size={16} color={theme.colors.primary} />
                 <Text style={styles.headerBadgeText}>可信记录</Text>
+                </View>
               </View>
             </View>
 
@@ -325,13 +337,29 @@ export default function HomeScreen() {
                 </View>
               </View>
 
-              <View style={styles.insightCard}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.insightCard,
+                  !notificationEnabled && styles.insightCardAction,
+                  pressed && !notificationEnabled && styles.insightCardPressed,
+                ]}
+                onPress={openNotificationAccessSettings}
+                disabled={notificationEnabled}
+                accessibilityRole={!notificationEnabled ? 'button' : undefined}
+                accessibilityLabel={!notificationEnabled ? '打开通知访问设置' : '通知导入已开启'}
+              >
                 <Text style={styles.insightLabel}>通知导入</Text>
                 <Text style={styles.insightValue}>{notificationEnabled ? '已开启' : '待开启'}</Text>
                 <Text style={styles.insightSubValue}>
                   {notificationEnabled ? '支付通知会自动补录' : '建议开启自动记账'}
                 </Text>
-              </View>
+                {!notificationEnabled && (
+                  <View style={styles.insightActionRow}>
+                    <Text style={styles.insightActionText}>去开启</Text>
+                    <Ionicons name="chevron-forward" size={16} color={theme.colors.primary} />
+                  </View>
+                )}
+              </Pressable>
             </View>
 
             <View style={styles.trendCard}>
@@ -563,6 +591,10 @@ export default function HomeScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+      <DeveloperLogsScreen
+        visible={showDeveloperLogs}
+        onClose={() => setShowDeveloperLogs(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -604,6 +636,19 @@ function createStyles(theme: AppTheme) {
       gap: theme.spacing.xs,
       paddingHorizontal: theme.spacing.md,
       paddingVertical: theme.spacing.sm,
+      borderRadius: theme.radius.pill,
+      backgroundColor: theme.colors.primaryMuted,
+    },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing.sm,
+    },
+    headerIconButton: {
+      width: 36,
+      height: 36,
+      alignItems: 'center',
+      justifyContent: 'center',
       borderRadius: theme.radius.pill,
       backgroundColor: theme.colors.primaryMuted,
     },
@@ -669,6 +714,13 @@ function createStyles(theme: AppTheme) {
       borderRadius: theme.radius.md,
       backgroundColor: theme.colors.surface,
     },
+    insightCardAction: {
+      borderWidth: 1,
+      borderColor: theme.colors.primaryMuted,
+    },
+    insightCardPressed: {
+      opacity: 0.78,
+    },
     insightCardLarge: {
       flex: 1.2,
     },
@@ -693,6 +745,17 @@ function createStyles(theme: AppTheme) {
       color: theme.colors.textSecondary,
       fontSize: theme.typography.caption,
       lineHeight: 18,
+    },
+    insightActionRow: {
+      marginTop: theme.spacing.md,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    insightActionText: {
+      color: theme.colors.primary,
+      fontSize: theme.typography.caption,
+      fontWeight: '700',
     },
     trendCard: {
       marginTop: theme.spacing.lg,

@@ -19,6 +19,7 @@ import {
   updateTransactionNote,
 } from '../database/db';
 import { extractAmount, matchCategory } from '../utils/categoryMatcher';
+import { writeDebugLog } from '../utils/debugLogger';
 
 interface TransactionStore {
   transactions: Transaction[];
@@ -113,32 +114,63 @@ export const useTransactionStore = create<TransactionStore>((set, get) => ({
   importNotifications: (notifications) => {
     let importedCount = 0;
 
+    writeDebugLog('import', `start notification import count=${notifications.length}`);
+
     for (const notification of notifications) {
-      const raw = [notification.title, notification.text].filter(Boolean).join('\n');
-      const amount = extractAmount(raw);
+      try {
+        const raw = [notification.title, notification.text].filter(Boolean).join('\n');
+        const amount = extractAmount(raw);
 
-      if (!amount) {
-        continue;
-      }
+        writeDebugLog(
+          'parser',
+          `notification received externalId=${notification.externalId} amount=${amount ?? 'none'} raw=${raw
+            .replace(/\s+/g, ' ')
+            .slice(0, 180)}`
+        );
 
-      const result = insertTransaction({
-        amount,
-        category: matchCategory(raw),
-        note: notification.title || notification.packageName,
-        source: 'notification',
-        raw,
-        externalId: notification.externalId,
-        createdAt: notification.postedAt,
-      });
+        if (!amount) {
+          writeDebugLog('parser', `skipped: amount extraction failed externalId=${notification.externalId}`, 'warn');
+          continue;
+        }
 
-      if (result > 0) {
-        importedCount += 1;
+        const category = matchCategory(raw);
+        const result = insertTransaction({
+          amount,
+          category,
+          note: notification.title || notification.packageName,
+          source: 'notification',
+          raw,
+          externalId: notification.externalId,
+          createdAt: notification.postedAt,
+        });
+
+        if (result > 0) {
+          importedCount += 1;
+          writeDebugLog(
+            'database',
+            `inserted transaction id=${result} amount=${amount} category=${category} externalId=${notification.externalId}`
+          );
+        } else {
+          writeDebugLog(
+            'database',
+            `skipped duplicate or ignored transaction externalId=${notification.externalId}`,
+            'warn'
+          );
+        }
+      } catch (error) {
+        writeDebugLog(
+          'import',
+          `failed notification externalId=${notification.externalId} error=${String(error)}`,
+          'error'
+        );
       }
     }
 
     if (importedCount > 0) {
       get().refresh();
     }
+
+    writeDebugLog('import', `finish notification import importedCount=${importedCount}`);
 
     return importedCount;
   },

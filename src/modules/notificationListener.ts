@@ -1,10 +1,13 @@
 import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
-import { PaymentNotification } from '../types';
+import { DebugLog, PaymentNotification } from '../types';
+import { writeDebugLog } from '../utils/debugLogger';
 
 type PaymentNotificationNativeModule = {
   consumePendingNotifications?: () => Promise<PaymentNotification[]>;
   isNotificationAccessEnabled?: () => Promise<boolean>;
   openNotificationAccessSettings?: () => void;
+  getDebugLogs?: () => Promise<DebugLog[]>;
+  clearDebugLogs?: () => void;
 };
 
 const nativeModule = NativeModules.PaymentNotificationModule as PaymentNotificationNativeModule | undefined;
@@ -15,6 +18,7 @@ const eventEmitter =
 
 function normalizeNotification(value: Partial<PaymentNotification>): PaymentNotification | null {
   if (!value.externalId) {
+    writeDebugLog('bridge', 'notification dropped because externalId is missing', 'warn');
     return null;
   }
 
@@ -48,6 +52,18 @@ export async function isNotificationAccessEnabled(): Promise<boolean> {
 
 export function openNotificationAccessSettings(): void {
   nativeModule?.openNotificationAccessSettings?.();
+}
+
+export async function getNativeDebugLogs(): Promise<DebugLog[]> {
+  if (Platform.OS !== 'android' || !nativeModule?.getDebugLogs) {
+    return [];
+  }
+
+  return nativeModule.getDebugLogs();
+}
+
+export function clearNativeDebugLogs(): void {
+  nativeModule?.clearDebugLogs?.();
 }
 
 export function listenToNotifications(

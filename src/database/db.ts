@@ -1,5 +1,12 @@
 import * as SQLite from 'expo-sqlite';
-import { CategoryId, SummaryItem, SummaryPeriod, Transaction, TransactionFilter } from '../types';
+import {
+  CategoryId,
+  DebugLog,
+  SummaryItem,
+  SummaryPeriod,
+  Transaction,
+  TransactionFilter,
+} from '../types';
 
 const db = SQLite.openDatabaseSync('moneypal.db');
 
@@ -37,7 +44,47 @@ export function initDB(): void {
       key TEXT PRIMARY KEY NOT NULL,
       value TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS debug_logs (
+      id        INTEGER PRIMARY KEY AUTOINCREMENT,
+      timestamp TEXT NOT NULL,
+      source    TEXT NOT NULL,
+      level     TEXT NOT NULL DEFAULT 'info',
+      message   TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_debug_logs_timestamp
+    ON debug_logs (timestamp DESC);
   `);
+}
+
+export function insertDebugLog(log: Omit<DebugLog, 'id'>): void {
+  db.runSync(
+    `INSERT INTO debug_logs (timestamp, source, level, message)
+     VALUES (?, ?, ?, ?)`,
+    log.timestamp,
+    log.source,
+    log.level,
+    log.message
+  );
+
+  db.runSync(
+    `DELETE FROM debug_logs
+     WHERE id NOT IN (SELECT id FROM debug_logs ORDER BY timestamp DESC, id DESC LIMIT 200)`
+  );
+}
+
+export function queryDebugLogs(): DebugLog[] {
+  return db.getAllSync<DebugLog>(
+    `SELECT id, timestamp, source, level, message
+     FROM debug_logs
+     ORDER BY timestamp DESC, id DESC
+     LIMIT 200`
+  );
+}
+
+export function clearDebugLogs(): void {
+  db.runSync('DELETE FROM debug_logs');
 }
 
 export function insertTransaction(tx: Omit<Transaction, 'id'>): number {
