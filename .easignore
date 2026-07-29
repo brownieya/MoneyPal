@@ -1,0 +1,26 @@
+# Keep the EAS archive source-only. Native build outputs can contain
+# machine-specific absolute paths and must be regenerated on the builder.
+node_modules/
+.expo/
+dist/
+web-build/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+ios/Pods/
+
+# Editor and local files
+.idea/
+.vscode/
+.agents/
+.claude/
+.codex/
+*.log
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+.DS_Store

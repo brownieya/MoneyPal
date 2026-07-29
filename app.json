@@ -4,9 +4,7 @@
     "slug": "MoneyPal",
     "version": "1.0.1",
     "scheme": "moneypal",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.1",
     "android": {
       "package": "com.moneypal"
     },
