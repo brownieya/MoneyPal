@@ -260,8 +260,3 @@ npm run update:production
 - [Expo Updates (SDK 56)](https://docs.expo.dev/versions/v56.0.0/sdk/updates/)
 - [EAS Update Get Started](https://docs.expo.dev/eas-update/getting-started/)
 - [EAS JSON](https://docs.expo.dev/eas/json/)
-
-如果后面你希望，我还可以继续补两类内容到这个 README：
-
-1. `从零到第一次成功 OTA` 的截图式操作说明
-2. `哪些改动能 OTA、哪些改动必须重打包` 的项目内实例清单
